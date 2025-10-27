@@ -1,0 +1,61 @@
+name: IoT Security Scan (Frontend)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  iot-security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          cd front-end
+          npm ci
+
+      - name: Start frontend app
+        run: |
+          cd front-end
+          nohup npm run dev -- --host &
+          sleep 10
+
+      - name: Install scanners
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nikto wapiti nmap
+
+      - name: Run Nikto
+        run: |
+          chmod +x scanners_scripts/run_nikto.sh
+          ./scanners_scripts/run_nikto.sh http://localhost:5173
+
+      - name: Run Wapiti
+        run: |
+          chmod +x scanners_scripts/run_wapiti.sh
+          ./scanners_scripts/run_wapiti.sh http://localhost:5173
+
+      - name: Run Nmap
+        run: |
+          chmod +x scanners_scripts/run_nmap.sh
+          ./scanners_scripts/run_nmap.sh localhost
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: scanner-reports
+          path: |
+            nikto_report.html
+            wapiti_report/
+            nmap_report.txt
