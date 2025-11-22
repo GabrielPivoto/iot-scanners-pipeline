@@ -1,4 +1,4 @@
-name: IoT Security Scan (Frontend)
+name: IoT Security Scan (Docker Environment)
 
 on:
   push:
@@ -15,42 +15,53 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
+      - name: Set up Docker Compose
         run: |
-          cd front-end
-          npm ci
-
-      - name: Start frontend app
-        run: |
-          cd front-end
-          nohup npm run dev -- --host &
-          sleep 10
+          cd pyotest
+          docker compose up -d
+          cd ..
+          sleep 20  
 
       - name: Install scanners
         run: |
           sudo apt-get update
           sudo apt-get install -y nikto wapiti nmap
 
-      - name: Run Nikto
+      # ------------------ NIKTO -------------------
+      - name: Run Nikto (Traversal HTTP)
         run: |
           chmod +x scanners_scripts/run_nikto.sh
-          ./scanners_scripts/run_nikto.sh http://localhost:5173
+          ./scanners_scripts/run_nikto.sh http://localhost:8080
 
-      - name: Run Wapiti
+      - name: Run Nikto (Admin Panel)
+        run: |
+          ./scanners_scripts/run_nikto.sh http://localhost:8081
+
+      # ------------------ WAPITI -------------------
+      - name: Run Wapiti (Traversal)
         run: |
           chmod +x scanners_scripts/run_wapiti.sh
-          ./scanners_scripts/run_wapiti.sh http://localhost:5173
+          ./scanners_scripts/run_wapiti.sh http://localhost:8080
 
-      - name: Run Nmap
+      - name: Run Wapiti (Admin Panel)
+        run: |
+          ./scanners_scripts/run_wapiti.sh http://localhost:8081
+
+      # ------------------ NMAP -------------------
+      - name: Run Nmap (Multiple Ports)
         run: |
           chmod +x scanners_scripts/run_nmap.sh
-          ./scanners_scripts/run_nmap.sh localhost
+          ./scanners_scripts/run_nmap.sh "localhost -p 8080,8081,8082,2121,2122,2323,2222,1883"
 
+      # ------------------ INTERNAL SCANNER -------------------
+      - name: Run internal scanner container
+        run: |
+          mkdir -p pyotest/report
+          cd pyotest
+          docker compose run scanner
+          cd ..
+
+      # ------------------ EXPORT REPORTS -------------------
       - name: Upload reports
         uses: actions/upload-artifact@v4
         with:
@@ -59,3 +70,10 @@ jobs:
             nikto_report.html
             wapiti_report/
             nmap_report.txt
+            pyotest/report/
+
+      - name: Shutdown containers
+        if: always()
+        run: |
+          cd pyotest
+          docker compose down -v
