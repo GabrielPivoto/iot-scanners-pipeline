@@ -47,6 +47,10 @@ jobs:
         run: |
           ./scanners_scripts/run_wapiti.sh http://localhost:8081
 
+      - name: Run Wapiti (DWA)
+        run: |
+          ./scanners_scripts/run_wapiti.sh http://localhost:8083   
+
       # ------------------ NMAP -------------------
       - name: Run Nmap (Multiple Ports)
         run: |

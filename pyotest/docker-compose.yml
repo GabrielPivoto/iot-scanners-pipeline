@@ -89,6 +89,16 @@ services:
       iot_bridge:
         ipv4_address: 172.20.0.17
 
+  dvwa:
+    image: vulnerables/web-dvwa
+    container_name: dvwa
+    ports:
+      - "8083:80"
+    restart: unless-stopped  
+    networks:
+      iot_bridge:
+        ipv4_address: 172.20.0.18
+      
   scanner:
     build: .
     container_name: scanner
@@ -107,7 +117,7 @@ services:
       - ./report:/app/report
     networks:
       iot_bridge:
-        ipv4_address: 172.20.0.18
+        ipv4_address: 172.20.0.19
 
 networks:
   iot_bridge:
