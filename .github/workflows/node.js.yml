@@ -50,7 +50,7 @@ jobs:
       - name: Run Wapiti (DVWA)
         run: |
           wapiti -u "http://localhost:8083/vulnerabilities/sqli/?id=1&Submit=Submit#" \
-          -level=2 \
+          --level=2 \
           --scope url
 
       # ------------------ NMAP -------------------
