@@ -94,8 +94,6 @@ services:
     container_name: dvwa
     ports:
       - "8083:80"
-    volumes:
-      - ./config/config.inc.php:/var/www/html/config/config.inc.php
     restart: unless-stopped  
     networks:
       iot_bridge:

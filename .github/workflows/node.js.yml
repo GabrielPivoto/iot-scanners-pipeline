@@ -49,11 +49,8 @@ jobs:
 
       - name: Run Wapiti (DVWA)
         run: |
-          wapiti -u http://localhost:8083 \
-          --auth-type post \
-          -a "admin:password" \
-          --external-endpoint "http://localhost:8083/login.php?Login=Login" \
-          --level=2 \
+          wapiti -u "http://localhost:8083/vulnerabilities/sqli/?id=1&Submit=Submit#" \
+          -level=2 \
           --scope url
 
       # ------------------ NMAP -------------------
