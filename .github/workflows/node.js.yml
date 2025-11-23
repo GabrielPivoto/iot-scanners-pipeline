@@ -47,13 +47,14 @@ jobs:
         run: |
           ./scanners_scripts/run_wapiti.sh http://localhost:8081
 
-      - name: Run Wapiti (DWA)
+      - name: Run Wapiti (DVWA)
         run: |
           wapiti -u http://localhost:8083 \
-          --post-login="http://localhost:8083/login.php" \
-          --post-data="username=admin&password=password&Login=Login" \
+          --auth-type post \
+          -a "admin:password" \
+          --external-endpoint "http://localhost:8083/login.php?Login=Login" \
           --level=2 \
-          --scope url  
+          --scope url
 
       # ------------------ NMAP -------------------
       - name: Run Nmap (Multiple Ports)
